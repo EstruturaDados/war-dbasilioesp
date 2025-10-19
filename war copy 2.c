@@ -28,35 +28,70 @@ void limparBufferEntrada() {
 int main() {
 
     Territorio territorios[MAX_TERRITORIOS];
+    int iT = 0; // indice territorios
     int opcao;
 
     do {
         printf("============================================================================\n");
         printf("PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO\n");
         printf("============================================================================\n");
+        printf("1 - Cadastrar territorio\n");
+        printf("2 - Mostrar mapa\n");
+        printf("0 - Sair\n");
 
-        printf("Cadastre 5 territorios\n\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+        limparBufferEntrada();
 
-        for (int i = 0; i < MAX_TERRITORIOS; i++) {
-            printf("----- Cadastro Territorio %d ------\n\n", i + 1);
+        switch(opcao) {
+            case 1:
+                if (iT < MAX_TERRITORIOS) {
+                    printf("---- Cadastro do Territorio ----\n\n");
 
-            printf("Digite o nome: ");
-            fgets(territorios[i].nome, MAX_NOME, stdin);
+                    printf("Digite o nome: ");
+                    fgets(territorios[iT].nome, MAX_NOME, stdin);
 
-            printf("Digite a cor: ");
-            fgets(territorios[i].cor, MAX_COLOR, stdin);
+                    printf("Digite a cor: ");
+                    fgets(territorios[iT].cor, MAX_COLOR, stdin);
 
-            territorios[i].nome[strcspn(territorios[i].nome, "\n")] = "\0";
-            territorios[i].cor[strcspn(territorios[i].cor, "\n")] = "\0";
-            
-            printf("Digite quantidade de tropas: ");
-            scanf("%d", &territorios[i].num_tropas);
-            limparBufferEntrada();
+                    territorios[iT].nome[strcspn(territorios[iT].nome, "\n")] = "\0";
+                    territorios[iT].cor[strcspn(territorios[iT].cor, "\n")] = "\0";
+                    //  buffer[strcspn(buffer, "\n")] = '\0';
 
-            printf("Territorio cadastrado.\n\n");
+                    printf("Digite quantidade de tropas: ");
+                    scanf("%d", &territorios[iT].num_tropas);
+                    limparBufferEntrada();
+
+                    iT++;
+                    printf("Territorio cadastrado.\n\n");
+                } else {
+                    printf("Máximo de territorios cadastrados! Reinicie o sistema.\n\n");
+                }
+
+                printf("Digite Enter para continuar...");
+                getchar();
+                break;
+            case 2: 
+                printf("\n\n---- Mapa ----\n\n");
+
+                if (iT == 0) {
+                    printf("Nenhum territorio cadastrado\n");
+                } else {
+                    for (int i = 0; i < iT; i++) {
+                        printf("---------\n");
+                        printf("TERRITORIO: %s\n", territorios[i].nome);
+                        printf("Cor: %s\n", territorios[i].cor);
+                        printf("Tropas: %d\n", territorios[i].num_tropas);
+                    }
+                    printf("---------\n\n");
+                }
+
+                printf("Digite Enter para continuar...");
+                getchar();
+            break;
+            default: break;
         }
 
-       
     } while (opcao != 0);
 
     return 0;
