@@ -18,47 +18,85 @@ typedef struct  {
     int num_tropas;
 } Territorio;
 
+int opcao;
+int maxTerritorios;
+int atacante, defensor;
+Territorio* territorios;
 
 void limparBufferEntrada() {
     int c;
     while((c = getchar()) != '\n' && c != EOF);
 }
 
+void alocarMapa() {
+    printf("Digite quantos territorios no mapa: ");
+    scanf("%d", &maxTerritorios);
+    limparBufferEntrada();
+
+    free(territorios);
+    territorios = (Territorio*)malloc(maxTerritorios * sizeof(Territorio));
+}
+
+void inicializarTerritorios() {
+    for (int i = 0; i < maxTerritorios; i++) {
+        printf("\n----- Cadastro Territorio %d ------\n\n", i + 1);
+
+        printf("Digite o nome: ");
+        fgets(territorios[i].nome, MAX_NOME, stdin);
+
+        printf("Digite a cor: ");
+        fgets(territorios[i].cor, MAX_COLOR, stdin);
+
+        territorios[i].nome[strcspn(territorios[i].nome, "\n")] = '\0';
+        territorios[i].cor[strcspn(territorios[i].cor, "\n")] = '\0';
+        
+        printf("Digite quantidade de tropas: ");
+        scanf("%d", &territorios[i].num_tropas);
+        limparBufferEntrada();
+    }
+
+    printf("\n\nTERRITORIOS CADASTRADOS.\n\n");
+}
+
+void exibirMapa() {
+    printf("=============================\n");
+    printf("MAPA DO MUNDO - ESTADO ATUAL\n");
+    printf("=============================\n\n");
+
+    for (int i = 0; i < maxTerritorios; i++) {
+        printf("%d. %s (%s, Tropas: %d)\n", i + 1, territorios[i].nome, territorios[i].cor, territorios[i].num_tropas);
+    }
+}
+
+void faseDeAtaque() {
+    printf("--- FASE DE ATAQUE ---\n");
+    printf("Escolha o territorio atacante (1 a %d): ", maxTerritorios);
+    scanf("%d", &atacante);
+    limparBufferEntrada();
+
+    printf("Escolha o territorio defensor (1 a %d): ", maxTerritorios);
+    scanf("%d", &defensor);
+    limparBufferEntrada();
+}
+
+
 // --- Função Principal (main) ---
 int main() {
+    printf("============================================================================\n");
+    printf("PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO\n");
+    printf("============================================================================\n");
 
-    Territorio territorios[MAX_TERRITORIOS];
-    int opcao;
-
+    alocarMapa();
+    inicializarTerritorios();
+    exibirMapa();
+    
     do {
-        printf("============================================================================\n");
-        printf("PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO\n");
-        printf("============================================================================\n");
-
-        printf("Cadastre 5 territorios\n\n");
-
-        for (int i = 0; i < MAX_TERRITORIOS; i++) {
-            printf("----- Cadastro Territorio %d ------\n\n", i + 1);
-
-            printf("Digite o nome: ");
-            fgets(territorios[i].nome, MAX_NOME, stdin);
-
-            printf("Digite a cor: ");
-            fgets(territorios[i].cor, MAX_COLOR, stdin);
-
-            territorios[i].nome[strcspn(territorios[i].nome, "\n")] = "\0";
-            territorios[i].cor[strcspn(territorios[i].cor, "\n")] = "\0";
-            
-            printf("Digite quantidade de tropas: ");
-            scanf("%d", &territorios[i].num_tropas);
-            limparBufferEntrada();
-
-            printf("Territorio cadastrado.\n\n");
-        }
-
-       
+        faseDeAtaque();
+        
     } while (opcao != 0);
 
+
+    free(territorios);
     return 0;
 }
 
