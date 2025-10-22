@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
+#include <random>
+
+using namespace std;
+
 // ============================================================================
 //         PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO
 // ============================================================================
@@ -22,6 +27,15 @@ int opcao;
 int maxTerritorios;
 int atacante, defensor;
 Territorio* territorios;
+
+int rolarDado(int faces = 6) {
+    // Gerador de números aleatórios
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(1, faces);
+    
+    return distrib(gen);
+}
 
 void limparBufferEntrada() {
     int c;
@@ -69,6 +83,7 @@ void exibirMapa() {
 }
 
 void faseDeAtaque() {
+    printf("\n");
     printf("--- FASE DE ATAQUE ---\n");
     printf("Escolha o territorio atacante (1 a %d): ", maxTerritorios);
     scanf("%d", &atacante);
