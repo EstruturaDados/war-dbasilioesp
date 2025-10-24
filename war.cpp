@@ -1,17 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream>
-#include <random>
-
-using namespace std;
-
-// ============================================================================
-//         PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO
-// ============================================================================
-//        
-// ============================================================================
-//
+// #include <iostream>
+#include <time.h>
 
 #define MAX_NOME 50
 #define MAX_COLOR 10
@@ -26,20 +17,20 @@ typedef struct  {
 int opcao;
 int maxTerritorios;
 int atacante, defensor;
+bool faseAtaque = true;
+int vitorioso = -1;
 Territorio* territorios;
 
-int rolarDado(int faces = 6) {
-    // Gerador de números aleatórios
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(1, faces);
-    
-    return distrib(gen);
-}
 
 void limparBufferEntrada() {
     int c;
     while((c = getchar()) != '\n' && c != EOF);
+}
+
+void digiteParaContinuar() {
+    printf("\nPressione Enter para continuar...");
+    getchar();
+    limparBufferEntrada();
 }
 
 void alocarMapa() {
@@ -85,31 +76,93 @@ void exibirMapa() {
 void faseDeAtaque() {
     printf("\n");
     printf("--- FASE DE ATAQUE ---\n");
-    printf("Escolha o territorio atacante (1 a %d): ", maxTerritorios);
+    printf("Escolha o territorio atacante (1 a %d, ou 0 para sair): ", maxTerritorios);
     scanf("%d", &atacante);
     limparBufferEntrada();
+
+    if (atacante == 0) {
+        return;
+    }
 
     printf("Escolha o territorio defensor (1 a %d): ", maxTerritorios);
     scanf("%d", &defensor);
     limparBufferEntrada();
 }
 
+void simularAtaque() {
+    int ataque = rand() % 20;
+    int defesa = rand() % 20;
+    int atacanteI = atacante - 1;
+    int defensorI = defensor - 1;
+
+    printf("\n");
+    printf("--- RESULTADO DA BATALHA ---\n");
+    printf("O atacante %s rolou um dado e tirou: %d \n", territorios[atacanteI].nome, ataque);
+    printf("O defensor %s rolou um dado e tirou: %d \n", territorios[defensorI].nome, defesa);
+
+    if (ataque >= defesa) {
+        territorios[defensorI].num_tropas = territorios[defensorI].num_tropas - 1;
+        printf("VITORIA DO ATAQUE! O defensor perdeu uma 1 tropa.\n");
+
+        if (territorios[defensorI].num_tropas == 0) {
+            printf("CONQUISTA! O territorio %s foi dominado pelo Exercito %s\n", territorios[defensorI].nome, territorios[atacanteI].cor);
+        }
+    } else {
+        printf("ATAQUE FALHOU!\n");
+    }
+
+    digiteParaContinuar();
+}
+
+void verificarVitoria() {
+    int abatidos = 0;
+
+    for (int i = 0; i < maxTerritorios; i++) {
+        if (territorios[i].num_tropas == 0) {
+            abatidos += 1;
+        }
+    }
+
+    if (abatidos == maxTerritorios - 1) {
+        faseAtaque = false;
+
+        for (int i = 0; i < maxTerritorios; i++) {
+            if (territorios[i].num_tropas > 0) {
+                vitorioso = i;
+            }
+        }
+    }
+}
+
 
 // --- Função Principal (main) ---
 int main() {
+    srand(time(0));
+
     printf("============================================================================\n");
     printf("PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO\n");
     printf("============================================================================\n");
 
     alocarMapa();
     inicializarTerritorios();
-    exibirMapa();
     
-    do {
+    while(faseAtaque) {
+        exibirMapa();
         faseDeAtaque();
-        
-    } while (opcao != 0);
 
+        if (atacante != 0) {
+            simularAtaque();
+            verificarVitoria();
+        }
+    };
+
+    if (atacante == 0) {
+        printf("\n\nJogo encerrado e memoria liberada. Até a proxima!\n");
+    }
+    
+    if (vitorioso != -1) {
+        printf("\n\n*************  O GRANDE VENCEDOR %s  *************\n\n", territorios[vitorioso].nome);
+    }
 
     free(territorios);
     return 0;
