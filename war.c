@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <iostream>
 #include <time.h>
 
 #define MAX_NOME 50
@@ -15,12 +14,54 @@ typedef struct  {
 } Territorio;
 
 int opcao;
-int maxTerritorios;
-int atacante, defensor;
-bool faseAtaque = true;
-int vitorioso = -1;
-Territorio* territorios;
 
+void limparBufferEntrada();
+void digiteParaContinuar();
+void alocarMapa(int* maxTerritorios, Territorio* territorios);
+void inicializarTerritorios(int* maxTerritorios, Territorio* territorios);
+void exibirMapa(int* maxTerritorios, Territorio* territorios);
+void faseDeAtaque(int* atacante, int* defensor, bool* faseAtaque, int* maxTerritorios);
+void simularAtaque(int* atacante, int* defensor, Territorio* territorios);
+void verificarVitoria(int* maxTerritorios, bool* faseAtaque, int* vitorioso, Territorio* territorios);
+
+// --- Função Principal (main) ---
+int main() {
+    srand(time(0));
+
+    Territorio* territorios;
+    int maxTerritorios;
+    int atacante, defensor;
+    bool faseAtaque = true;
+    int vitorioso = -1;
+
+    printf("============================================================================\n");
+    printf("PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO\n");
+    printf("============================================================================\n");
+
+    alocarMapa(&maxTerritorios, territorios);
+    inicializarTerritorios(&maxTerritorios, territorios);
+    
+    while(faseAtaque) {
+        exibirMapa(&maxTerritorios, territorios);
+        faseDeAtaque(&atacante, &defensor, &faseAtaque, &maxTerritorios);
+        
+        if (atacante != 0) {
+            simularAtaque(&atacante, &defensor, territorios);
+            verificarVitoria(&maxTerritorios, &faseAtaque, &vitorioso, territorios);
+        }
+    };
+
+    if (atacante == 0) {
+        printf("\n\nJogo encerrado e memoria liberada. Até a proxima!\n");
+    }
+    
+    if (vitorioso != -1) {
+        printf("\n\n*************  O GRANDE VENCEDOR %s  *************\n\n", territorios[vitorioso].nome);
+    }
+
+    free(territorios);
+    return 0;
+}
 
 void limparBufferEntrada() {
     int c;
@@ -33,17 +74,16 @@ void digiteParaContinuar() {
     limparBufferEntrada();
 }
 
-void alocarMapa() {
+void alocarMapa(int* maxTerritorios, Territorio* territorios) {
     printf("Digite quantos territorios no mapa: ");
-    scanf("%d", &maxTerritorios);
+    scanf("%d", maxTerritorios);
     limparBufferEntrada();
 
-    free(territorios);
-    territorios = (Territorio*)malloc(maxTerritorios * sizeof(Territorio));
+    territorios = (Territorio*)malloc((*maxTerritorios) * sizeof(Territorio));
 }
 
-void inicializarTerritorios() {
-    for (int i = 0; i < maxTerritorios; i++) {
+void inicializarTerritorios(int* maxTerritorios, Territorio* territorios) {
+    for (int i = 0; i < *maxTerritorios; i++) {
         printf("\n----- Cadastro Territorio %d ------\n\n", i + 1);
 
         printf("Digite o nome: ");
@@ -63,37 +103,38 @@ void inicializarTerritorios() {
     printf("\n\nTERRITORIOS CADASTRADOS.\n\n");
 }
 
-void exibirMapa() {
+void exibirMapa(int* maxTerritorios, Territorio* territorios) {
     printf("=============================\n");
     printf("MAPA DO MUNDO - ESTADO ATUAL\n");
     printf("=============================\n\n");
 
-    for (int i = 0; i < maxTerritorios; i++) {
+    for (int i = 0; i < *maxTerritorios; i++) {
         printf("%d. %s (%s, Tropas: %d)\n", i + 1, territorios[i].nome, territorios[i].cor, territorios[i].num_tropas);
     }
 }
 
-void faseDeAtaque() {
+void faseDeAtaque(int* atacante, int* defensor, bool* faseAtaque, int* maxTerritorios) {
     printf("\n");
     printf("--- FASE DE ATAQUE ---\n");
-    printf("Escolha o territorio atacante (1 a %d, ou 0 para sair): ", maxTerritorios);
-    scanf("%d", &atacante);
+    printf("Escolha o territorio atacante (1 a %d, ou 0 para sair): ", *maxTerritorios);
+    scanf("%d", atacante);
     limparBufferEntrada();
 
-    if (atacante == 0) {
+    if ((*atacante) == 0) {
+        *faseAtaque = false;
         return;
     }
 
-    printf("Escolha o territorio defensor (1 a %d): ", maxTerritorios);
-    scanf("%d", &defensor);
+    printf("Escolha o territorio defensor (1 a %d): ", *maxTerritorios);
+    scanf("%d", defensor);
     limparBufferEntrada();
 }
 
-void simularAtaque() {
+void simularAtaque(int* atacante, int* defensor, Territorio* territorios) {
     int ataque = rand() % 20;
     int defesa = rand() % 20;
-    int atacanteI = atacante - 1;
-    int defensorI = defensor - 1;
+    int atacanteI = *atacante - 1;
+    int defensorI = *defensor - 1;
 
     printf("\n");
     printf("--- RESULTADO DA BATALHA ---\n");
@@ -114,59 +155,26 @@ void simularAtaque() {
     digiteParaContinuar();
 }
 
-void verificarVitoria() {
+void verificarVitoria(int* maxTerritorios, bool* faseAtaque, int* vitorioso, Territorio* territorios) {
     int abatidos = 0;
 
-    for (int i = 0; i < maxTerritorios; i++) {
+    for (int i = 0; i < *maxTerritorios; i++) {
         if (territorios[i].num_tropas == 0) {
             abatidos += 1;
         }
     }
 
-    if (abatidos == maxTerritorios - 1) {
-        faseAtaque = false;
+    if (abatidos == *maxTerritorios - 1) {
+        *faseAtaque = false;
 
-        for (int i = 0; i < maxTerritorios; i++) {
+        for (int i = 0; i < *maxTerritorios; i++) {
             if (territorios[i].num_tropas > 0) {
-                vitorioso = i;
+                *vitorioso = i;
             }
         }
     }
 }
 
-
-// --- Função Principal (main) ---
-int main() {
-    srand(time(0));
-
-    printf("============================================================================\n");
-    printf("PROJETO WAR ESTRUTURADO - DESAFIO DE CÓDIGO\n");
-    printf("============================================================================\n");
-
-    alocarMapa();
-    inicializarTerritorios();
-    
-    while(faseAtaque) {
-        exibirMapa();
-        faseDeAtaque();
-
-        if (atacante != 0) {
-            simularAtaque();
-            verificarVitoria();
-        }
-    };
-
-    if (atacante == 0) {
-        printf("\n\nJogo encerrado e memoria liberada. Até a proxima!\n");
-    }
-    
-    if (vitorioso != -1) {
-        printf("\n\n*************  O GRANDE VENCEDOR %s  *************\n\n", territorios[vitorioso].nome);
-    }
-
-    free(territorios);
-    return 0;
-}
 
 // --- Implementação das Funções ---
 
